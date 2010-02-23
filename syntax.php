@@ -5,11 +5,9 @@
  * syntax ~~ORPHANSWANTED:<choice>[!<exclude list>]~~  <choice> :: orphans | wanted | valid | all
  * [!<exclude list>] :: optional.  prefix each with ! e.g., !wiki!comments:currentyear
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     dae@douglasedmunds.com >
- * Updated by Andy Webber to include comments from DokuWiki plugin page upto 2008-11-10
- *
- * Author                     | Date       | Fix
- * Federico Ariel Castagnini  | 2009/08/24 | I have fixed the code for the backlinks, now they work.
+ * @author     <dae@douglasedmunds.com>
+ * @author     Andy Webber <dokuwiki at andywebber dot com>
+ * @author     Federico Ariel Castagnini
  */
 
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
@@ -232,15 +230,15 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
      */
     function getInfo(){
         return array(
-            'author' => 'Doug Edmunds',
-            'email'  => 'dae@douglasedmunds.com',
-            'date'   => '2008-11-13',
-            'name'   => 'OrphansWanted Plugin ver 2.4',
+            'author' => 'Doug Edmunds, Andy Webber, Federico Ariel Castagnini',
+            'email'  => 'dokuwiki at andywebber dot com',
+            'date'   => @file_get_contents(DOKU_PLUGIN . 'VERSION'),
+            'name'   => 'OrphansWanted Plugin',
             'desc'   => 'Find orphan pages and wanted pages .
             syntax ~~ORPHANSWANTED:<choice>[!<excluded namespaces>]~~ .
             <choice> :: orphans|wanted|valid|all .
             <excluded namespaces> are optional, start each namespace with !' ,
-            'url'    => 'http://wiki.splitbrain.org/plugin:orphanswanted',
+            'url'    => 'http://dokuwiki.org/plugin:orphanswanted',
         );
     }
 
