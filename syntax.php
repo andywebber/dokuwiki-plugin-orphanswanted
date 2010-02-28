@@ -202,7 +202,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[0-9a-zA-Z:!]+~~',$mode,'plugin_orphanswanted');
+        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[0-9a-zA-Z_:!]+~~',$mode,'plugin_orphanswanted');
     }
  
     /**
