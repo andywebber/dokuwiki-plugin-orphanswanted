@@ -213,7 +213,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
         $match_array = array();
         $match = substr($match,16,-2); //strip ~~ORPHANSWANTED: from start and ~~ from end
         // Wolfgang 2007-08-29 suggests commenting out the next line
-        $match = strtolower($match);
+        // $match = strtolower($match);
         //create array, using ! as separator
         $match_array = explode("!", $match);
         // $match_array[0] will be orphan, wanted, valid, all, or syntax error
