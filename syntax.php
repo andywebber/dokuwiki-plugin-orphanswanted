@@ -376,7 +376,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
   			. ($show_heading ? '<td>' . hsc(p_get_first_heading($id)) .'</td>' : '' )
         . '<td>' . $item['links']
         . ($has_links
-            ? "&nbsp;:&nbsp;<a href=\"". wl($id) . "&amp;do=backlink\" class=\"wikilink1\">Show&nbsp;backlinks</a>"
+            ? "&nbsp;:&nbsp;<a href=\"". wl($id, 'do=backlink') ."\" class=\"wikilink1\">Show&nbsp;backlinks</a>"
             : ''
             )
         . "</td></tr>\n";
