@@ -16,6 +16,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
  
 require_once(DOKU_INC.'inc/search.php');
  
+define('DEBUG', 0);
  
 //-------------------------------------
  
@@ -63,7 +64,6 @@ function orph_handle_link( &$data, $link )
 		// This item already has a member in the array
 		// Note that the file search found it
 		$data[$link]['links'] ++ ;   // count the link
-		// echo "      <!-- added count? " . $item['links'] . " --> \n";
   } else {
 		// Create a new entry
 		$data[$link] = array(
@@ -72,6 +72,7 @@ function orph_handle_link( &$data, $link )
     );
 		// echo "      <!-- added link to list --> \n";
   }
+	if (DEBUG) echo "<p>-- New count for link <b>" . $link . "</b>: " . $data[$link]['links'] . "</p>\n";
 }
  
  
@@ -80,8 +81,7 @@ function orph_handle_link( &$data, $link )
  */ 
 function orph_Check_InternalLinks( &$data, $base, $file, $type, $lvl, $opts )
 {
-  $dbg = false ;
- 
+  global $conf;
   define('LINK_PATTERN', '%\[\[([^\]|#]*)(#[^\]|]*)?\|?([^\]]*)]]%');
  
   if( ! preg_match("/.*\.txt$/", $file) )
@@ -89,17 +89,19 @@ function orph_Check_InternalLinks( &$data, $base, $file, $type, $lvl, $opts )
     return ;
   }
  
-  if( $dbg ) echo '<p><b>'.$file.'</b></p>' ;
+  $currentID = pathID($file);
+  $currentNS = getNS($currentID);
+
+  if(DEBUG) echo sprintf("<p><b>%s</b>: %s</p>\n", $file, $currentID);
  
-  global $conf;
   // echo "  <!-- checking file: $file -->\n";
   $body = @file_get_contents($conf['datadir'] . $file);
  
   // ignores entries in <nowiki>, %%, <code> and emails with @
   foreach( array(
-              '/<nowiki>.*<\/nowiki>/',
-              '/%%.*%%/',
-              '/<code .*>.*<\/code>/'
+              '/<nowiki>.*?<\/nowiki>/',
+              '/%%.*?%%/',
+              '/<code .*?>.*?<\/code>/'
             )
             as $ignored )
   {
@@ -111,43 +113,40 @@ function orph_Check_InternalLinks( &$data, $base, $file, $type, $lvl, $opts )
  
   foreach( $links[1] as $link )
   {
-        if( $dbg ) echo $link ;
+        if(DEBUG) echo sprintf("--- Checking %s<br />\n", $link);
  
-		    if( (0 < strlen(ltrim($link)))
+		if( (0 < strlen(ltrim($link)))
 			   and ! preg_match('/^[a-zA-Z0-9\.]+>{1}.*$/u',$link) // Interwiki
 			   and ! preg_match('/^\\\\\\\\[\w.:?\-;,]+?\\\\/u',$link) // Windows Share
 			   and ! preg_match('#^([a-z0-9\-\.+]+?)://#i',$link) // external link (accepts all protocols)
 			   and ! preg_match('<'.PREG_PATTERN_VALID_EMAIL.'>',$link) // E-Mail (pattern above is defined in inc/mail.php)
 			   and ! preg_match('!^#.+!',$link) // inside page link (html anchor)
          ) {
- 
-        $pageExists=false;
-        resolve_pageid(false,$link,$pageExists );
-        //echo 'link='.$link.' '.($pageExists?'EXISTS':'MISS').'<br/>';
- 
-				if(((strlen(ltrim($link)) > 0)           // there IS an id?
-			     and !auth_quickaclcheck($link) < AUTH_READ)) {    // should be visible to user
-					//echo "      <!-- adding $link -->\n";
- 
-				  if( $dbg ) echo ' A_LINK' ;
- 
-					$link= strtolower( $link );
-					orph_handle_link($data, $link);
+                $pageExists=false;
+                resolve_pageid($currentNS,$link,$pageExists );
+                if (DEBUG) echo sprintf("---- link='%s' %s ", $link, $pageExists?'EXISTS':'MISS');
+         
+                if(((strlen(ltrim($link)) > 0)           // there IS an id?
+                         and !auth_quickaclcheck($link) < AUTH_READ)) {    // should be visible to user
+                            //echo "      <!-- adding $link -->\n";
+         
+                          if(DEBUG) echo ' A_LINK' ;
+         
+                            $link= strtolower( $link );
+                            orph_handle_link($data, $link);
+                }
+                else
+                {
+                  if(DEBUG) echo ' EMPTY_OR_FORBIDDEN' ;
+                }
+		} // link is not empty and is a local link?
+		else
+		{
+			 if(DEBUG) echo ' NOT_INTERNAL';
         }
-        else
-        {
-          if( $dbg ) echo ' EMPTY_OR_FORBIDDEN' ;
-        }
-			} // link is not empty and is a local link?
-			else
-			{
-			 if( $dbg ) echo ' NOT_INTERNAL';
-      }
  
-			if( $dbg ) echo "<br>\n";
- 
-		} // end of foreach link
- 
+		if(DEBUG) echo "<br />\n";
+	} // end of foreach link
 }
  
  
@@ -166,7 +165,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
         return array(
             'author' => 'Doug Edmunds',
             'email'  => 'dae@douglasedmunds.com',
-            'date'   => @file_get_contents(DOKU_PLUGIN . 'VERSION'),
+            'date'   => @file_get_contents(dirname(__FILE__) . '/VERSION'),
             'name'   => 'OrphansWanted Plugin',
             'desc'   => 'Find orphan pages and wanted pages .
             syntax ~~ORPHANSWANTED:<choice>[!<excluded namespaces>]~~ .
@@ -395,4 +394,5 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
  
 }
  
+//Setup VIM: ex: et ts=4 enc=utf-8 :
 ?>
