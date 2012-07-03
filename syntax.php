@@ -77,6 +77,9 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
         $helper = plugin_load('helper','orphanswanted');
         
         if($format == 'xhtml') {
+            // prevent caching to ensure content is always fresh
+            $renderer->info['cache'] = false;
+            
 			// user needs to add ~~NOCACHE~~ manually to page, to assure ACL rules are followed
 			// coding here is too late, it doesn't get parsed
 			// $renderer->doc .= "~~NOCACHE~~";
