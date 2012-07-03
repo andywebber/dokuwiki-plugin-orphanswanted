@@ -79,11 +79,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
         if($format == 'xhtml') {
             // prevent caching to ensure content is always fresh
             $renderer->info['cache'] = false;
-            
-			// user needs to add ~~NOCACHE~~ manually to page, to assure ACL rules are followed
-			// coding here is too late, it doesn't get parsed
-			// $renderer->doc .= "~~NOCACHE~~";
- 
+
             // $data is an array
             // $data[1]..[x] are excluded namespaces, $data[0] is the report type
             //handle choices
