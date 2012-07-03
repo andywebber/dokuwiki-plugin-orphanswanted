@@ -132,7 +132,7 @@ function orph_Check_InternalLinks( &$data, $base, $file, $type, $lvl, $opts )
          
                           if(DEBUG) echo ' A_LINK' ;
          
-                            $link= strtolower( $link );
+                            $link= utf8_strtolower( $link );
                             orph_handle_link($data, $link);
                 }
                 else
@@ -201,7 +201,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[0-9a-zA-Z_:!]+~~',$mode,'plugin_orphanswanted');
+        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[\w:!]+~~',$mode,'plugin_orphanswanted');
     }
  
     /**
