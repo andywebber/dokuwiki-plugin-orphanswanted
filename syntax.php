@@ -21,20 +21,6 @@ require_once(DOKU_PLUGIN.'syntax.php');
  * need to inherit from this class
  */
 class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
-
-    function getInfo(){
-        return array(
-            'author' => 'Doug Edmunds',
-            'email'  => 'dae@douglasedmunds.com',
-            'date'   => @file_get_contents(dirname(__FILE__) . '/VERSION'),
-            'name'   => 'OrphansWanted Plugin',
-            'desc'   => 'Find orphan pages and wanted pages .
-            syntax ~~ORPHANSWANTED:<choice>[!<excluded namespaces>]~~ .
-            <choice> :: orphans|wanted|valid|all .
-            <excluded namespaces> are optional, start each namespace with !' ,
-            'url'    => 'http://dokuwiki.org/plugin:orphanswanted',
-        );
-    }
  
     /**
      * What kind of syntax are we?
@@ -62,7 +48,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[0-9a-zA-Z_:!]+~~', $mode, 'plugin_orphanswanted');
+        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[\w:!]+~~', $mode, 'plugin_orphanswanted');
     }
  
     /**

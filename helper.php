@@ -127,7 +127,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
                      
                     if(DEBUG) echo ' A_LINK' ;
                      
-                    $link= strtolower( $link );
+                    $link= utf8_strtolower( $link );
                     $this->orph_handle_link($data, $link);
                 }
                 else
