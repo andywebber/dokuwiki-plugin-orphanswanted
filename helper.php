@@ -247,8 +247,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
             if($show_it) {
                 $output .=  "<tr><td>$count</td><td><a href=\"". wl($id)
-                . "\" class=\"" . ($page_exists ? "wikilink1" : "wikilink2")
-                . "\"  onclick=\"return svchk()\" onkeypress=\"return svchk()\">"
+                . "\" class=\"" . ($page_exists ? "wikilink1" : "wikilink2") . "\" >"
                 . $id .'</a></td>'
                 . ($show_heading ? '<td>' . hsc(p_get_first_heading($id)) .'</td>' : '' )
                 . '<td>' . $item['links']
