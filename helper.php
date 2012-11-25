@@ -155,7 +155,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $result = '';
         $data = array();
         search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => $ns));
-        $result .=  $this->orph_report_table($data, true, false,$params_array);
+        $result .=  $this->orph_report_table($data, true, false, $params_array, 'orphan');
 
         return $result;
     }
@@ -165,7 +165,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $result = '';
         $data = array();
         search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => $ns));
-        $result .= $this->orph_report_table($data, false, true,$params_array);
+        $result .= $this->orph_report_table($data, false, true, $params_array, 'wanted');
 
         return $result;
     }
@@ -175,7 +175,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $result = '';
         $data = array();
         search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => $ns));
-        $result .= $this->orph_report_table($data, true, true, $params_array);
+        $result .= $this->orph_report_table($data, true, true, $params_array, 'valid');
 
         return $result;
     }
@@ -187,17 +187,17 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted') , array('ns' => $ns));
 
         $result .= "</p><p>Orphans</p><p>";
-        $result .= $this->orph_report_table($data, true, false,$params_array);
+        $result .= $this->orph_report_table($data, true, false, $params_array, 'orphan');
         $result .= "</p><p>Wanted</p><p>";
-        $result .= $this->orph_report_table($data, false, true,$params_array);
+        $result .= $this->orph_report_table($data, false, true, $params_array, 'wanted');
         $result .= "</p><p>Valid</p><p>";
-        $result .= $this->orph_report_table($data, true, true, $params_array);
+        $result .= $this->orph_report_table($data, true, true, $params_array, 'valid');
 
 
         return $result;
     }
 
-    function orph_report_table($data, $page_exists, $has_links, $params_array) {
+    function orph_report_table($data, $page_exists, $has_links, $params_array, $caller = null) {
         global $conf;
 
         $show_heading = ($page_exists && $conf['useheading']) ? true : false ;
@@ -211,16 +211,15 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         // for valid html - need to close the <p> that is feed before this
         $output .= '</p>';
         $output .= '<table class="inline"><tr><th> # </th><th> ID </th>'
-        . ($show_heading ? '<th>Title</th>' : '' )
-        . '<th>Links</th></tr>'
-        ."\n" ;
+                    . ($show_heading ? '<th>Title</th>' : '' )
+                    . ($caller != "orphan" ? '<th>Links</th>' : '')
+                    . '</tr>'
+                    . "\n" ;
 
         arsort($data);
 
         foreach($data as $id=>$item) {
-            if( ! (($item['exists'] == $page_exists) and (($item['links'] <> 0)== $has_links)) ) {
-                continue ;
-            }
+            if( ! (($item['exists'] == $page_exists) and (($item['links'] <> 0)== $has_links)) ) continue ;
 
             // $id is a string, looks like this: page, namespace:page, or namespace:<subspaces>:page
             $match_array = explode(":", $id);
@@ -247,16 +246,16 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
             if($show_it) {
                 $output .=  "<tr><td>$count</td><td><a href=\"". wl($id)
-                . "\" class=\"" . ($page_exists ? "wikilink1" : "wikilink2") . "\" >"
-                . $id .'</a></td>'
-                . ($show_heading ? '<td>' . hsc(p_get_first_heading($id)) .'</td>' : '' )
-                . '<td>' . $item['links']
-                . ($has_links
-                ? "&nbsp;:&nbsp;<a href=\"". wl($id, 'do=backlink') ."\" class=\"wikilink1\">Show&nbsp;backlinks</a>"
-                : ''
-                )
-                . "</td></tr>\n";
+                            . "\" class=\"" . ($page_exists ? "wikilink1" : "wikilink2") . "\" >"
+                            . $id .'</a></td>'
+                            . ($show_heading ? '<td>' . hsc(p_get_first_heading($id)) .'</td>' : '' );
 
+                if($caller != "orphan") { // Skip "link" column if user wants orphan pages only
+                    $output .= '<td>' . $item['links']
+                                . ($has_links ? "&nbsp;:&nbsp;<a href=\"". wl($id, 'do=backlink')
+                                . "\" class=\"wikilink1\">Show&nbsp;backlinks</a>" : '') . "</td>";
+                }
+                $output .= "</tr>\n";
                 $count++;
             }
         }
