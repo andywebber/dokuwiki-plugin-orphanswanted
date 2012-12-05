@@ -13,8 +13,6 @@ if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 require_once(DOKU_INC.'inc/search.php');
 
-define('DEBUG', 0);
-
 class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
     function orph_callback_search_wanted(&$data, $base, $file, $type, $lvl, $opts) {
@@ -56,6 +54,8 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
     }
 
     function orph_handle_link(&$data, $link) {
+        global $conf;
+
         if(isset($data[$link])) {
             // This item already has a member in the array
             // Note that the file search found it
@@ -68,16 +68,17 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             );
             // echo "      <!-- added link to list --> \n";
         }
-        if (DEBUG) echo "<p>-- New count for link <b>" . $link . "</b>: " . $data[$link]['links'] . "</p>\n";
+
+        if ($conf['allowdebug']) echo "<p>-- New count for link <b>" . $link . "</b>: " . $data[$link]['links'] . "</p>\n";
     }
 
 
     /**
      * Search for internal wiki links in page $file
      */
-    function orph_Check_InternalLinks( &$data, $base, $file, $type, $lvl, $opts )
-    {
+    function orph_Check_InternalLinks( &$data, $base, $file, $type, $lvl, $opts ) {
         global $conf;
+
         define('LINK_PATTERN', '%\[\[([^\]|#]*)(#[^\]|]*)?\|?([^\]]*)]]%');
 
         if(!preg_match("/.*\.txt$/", $file)) {
@@ -87,7 +88,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $currentID = pathID($file);
         $currentNS = getNS($currentID);
 
-        if(DEBUG) echo sprintf("<p><b>%s</b>: %s</p>\n", $file, $currentID);
+        if($conf['allowdebug']) echo sprintf("<p><b>%s</b>: %s</p>\n", $file, $currentID);
 
         // echo "  <!-- checking file: $file -->\n";
         $body = @file_get_contents($conf['datadir'] . $file);
@@ -108,7 +109,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         preg_match_all( LINK_PATTERN, $body, $links );
 
         foreach($links[1] as $link) {
-            if(DEBUG) echo sprintf("--- Checking %s<br />\n", $link);
+            if($conf['allowdebug']) echo sprintf("--- Checking %s<br />\n", $link);
 
             if( (0 < strlen(ltrim($link)))
             and ! preg_match('/^[a-zA-Z0-9\.]+>{1}.*$/u',$link) // Interwiki
@@ -119,28 +120,28 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             ) {
                 $pageExists = false;
                 resolve_pageid($currentNS, $link, $pageExists );
-                if (DEBUG) echo sprintf("---- link='%s' %s ", $link, $pageExists?'EXISTS':'MISS');
+                if ($conf['allowdebug']) echo sprintf("---- link='%s' %s ", $link, $pageExists?'EXISTS':'MISS');
                  
                 if(((strlen(ltrim($link)) > 0)           // there IS an id?
                 and !auth_quickaclcheck($link) < AUTH_READ)) {
                     // should be visible to user
                     //echo "      <!-- adding $link -->\n";
                      
-                    if(DEBUG) echo ' A_LINK' ;
+                    if($conf['allowdebug']) echo ' A_LINK' ;
                      
                     $link= utf8_strtolower( $link );
                     $this->orph_handle_link($data, $link);
                 }
                 else
                 {
-                    if(DEBUG) echo ' EMPTY_OR_FORBIDDEN' ;
+                    if($conf['allowdebug']) echo ' EMPTY_OR_FORBIDDEN' ;
                 }
             } // link is not empty and is a local link?
             else {
-                if(DEBUG) echo ' NOT_INTERNAL';
+                if($conf['allowdebug']) echo ' NOT_INTERNAL';
             }
 
-            if(DEBUG) echo "<br />\n";
+            if($conf['allowdebug']) echo "<br />\n";
         } // end of foreach link
     }
 
@@ -193,15 +194,12 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $result .= "</p><p>Valid</p><p>";
         $result .= $this->orph_report_table($data, true, true, $params_array, 'valid');
 
-
         return $result;
     }
 
     function orph_report_table($data, $page_exists, $has_links, $params_array, $caller = null) {
         global $conf;
-
         $show_heading = ($page_exists && $conf['useheading']) ? true : false ;
-
         //take off $params_array[0];
         $exclude_array = array_slice($params_array,1);
 
