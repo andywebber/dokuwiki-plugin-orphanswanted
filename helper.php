@@ -199,6 +199,13 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
     function orph_report_table($data, $page_exists, $has_links, $params_array, $caller = null) {
         global $conf;
+        $ignoredPages = $this->getConf('ignoredpages'); // Fetch pages which shouldn't be listed
+        if($ignoredPages != '') {
+            $ignoredPages = explode(';', $ignoredPages);
+        } else {
+            $ignoredPages = null;
+        }
+
         $show_heading = ($page_exists && $conf['useheading']) ? true : false ;
         //take off $params_array[0];
         $exclude_array = array_slice($params_array,1);
@@ -230,15 +237,21 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
             //set it to show, unless blocked by exclusion list
             $show_it = true;
-            foreach ($exclude_array as $exclude_item) {
-                //add a trailing : to each $item too
-                $exclude_item = $exclude_item . ":";
-                // need === to avoid boolean false
-                // strpos(haystack, needle)
-                // if exclusion is beginning of page's namespace , block it
-                if (strpos($page_namespace, $exclude_item) === 0) {
-                    //there is a match, so block it
+
+            if(!is_null($ignoredPages) && in_array($id, $ignoredPages)) {
+                    echo "Skipped page (global ignored): " . $id . "<br />";
                     $show_it = false;
+            } else {
+                foreach ($exclude_array as $exclude_item) {
+                    //add a trailing : to each $item too
+                    $exclude_item = $exclude_item . ":";
+                    // need === to avoid boolean false
+                    // strpos(haystack, needle)
+                    // if exclusion is beginning of page's namespace , block it
+                    if (strpos($page_namespace, $exclude_item) === 0) {
+                        //there is a match, so block it
+                        $show_it = false;
+                    }
                 }
             }
 
