@@ -1,13 +1,15 @@
 <?php
 /**
  * OrphansWanted Plugin: Display Orphans, Wanteds and Valid link information
- * syntax ~~ORPHANSWANTED:<choice>[!<exclude list>]~~  <choice> :: orphans | wanted | valid | all
+ * syntax ~~ORPHANSWANTED:<choice>[@<include list>][!<exclude list>]~~  <choice> :: orphans | wanted | valid | all
+ * [@<include list>] :: optional.  prefix each with @ e.g., @wiki@comments:currentyear (defaults to all namespaces if not specified)
  * [!<exclude list>] :: optional.  prefix each with ! e.g., !wiki!comments:currentyear
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     <dae@douglasedmunds.com>
  * @author     Andy Webber <dokuwiki at andywebber dot com>
  * @author     Federico Ariel Castagnini
  * @author     Cyrille37 <cyrille37@gmail.com>
+ * @author     Rik Blok <rik dot blok at ubc dot ca>
  */
  
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
@@ -168,8 +170,9 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
             'date'   => @file_get_contents(dirname(__FILE__) . '/VERSION'),
             'name'   => 'OrphansWanted Plugin',
             'desc'   => 'Find orphan pages and wanted pages .
-            syntax ~~ORPHANSWANTED:<choice>[!<excluded namespaces>]~~ .
+            syntax ~~ORPHANSWANTED:<choice>[@<included namespaces>][!<excluded namespaces>]~~ .
             <choice> :: orphans|wanted|valid|all .
+            <included namespaces> are optional, start each namespace with @ (defaults to all) .
             <excluded namespaces> are optional, start each namespace with !' ,
             'url'    => 'http://dokuwiki.org/plugin:orphanswanted',
         );
@@ -201,7 +204,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[0-9a-zA-Z_:!]+~~',$mode,'plugin_orphanswanted');
+        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[0-9a-zA-Z_:@!]+~~',$mode,'plugin_orphanswanted');
     }
  
     /**
@@ -214,7 +217,13 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
         // Wolfgang 2007-08-29 suggests commenting out the next line
         // $match = strtolower($match);
         //create array, using ! as separator
-        $match_array = explode("!", $match);
+		// eg: $match = 'all@includens!excludens'
+        $match_in = explode("@", $match);						// eg: $match_array = array();							$match_in = array('all', 'includens!excludens')
+		$match_ex = explode("!",array_pop($match_in));	// eg: $match_array = array();							$match_in = array('all');							$match_ex = array('includens', 'excludens')
+		array_push($match_in,array_shift($match_ex));		// eg: $match_array = array();							$match_in = array('all', 'includens');				$match_ex = array('excludens')
+		$match_array[0] = array_shift($match_in);			// eg: $match_array = array('all');					$match_in = array('includens');					$match_ex = array('excludens')
+		$match_array[1] = $match_in;								// eg: $match_array = array('all', array('includens'));														$match_ex = array('excludens')
+		$match_array[2] = $match_ex;								// eg: $match_array = array('all', array('includens'), array('excludens'))
         // $match_array[0] will be orphan, wanted, valid, all, or syntax error
         // if there are excluded namespaces, they will be in $match_array[1] .. [x]
         // this return value appears in render() as the $data param there
@@ -320,7 +329,9 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
     $show_heading = ($page_exists && $conf['useheading']) ? true : false ;
  
     //take off $params_array[0];
-    $exclude_array = array_slice($params_array,1);
+    // old code: $exclude_array = array_slice($params_array,1);
+	$include_array = $params_array[1];
+	$exclude_array = $params_array[2];
  
     $count = 1;
     $output = '';
@@ -338,9 +349,9 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
     {
  
   		if( ! (($item['exists'] == $page_exists) and (($item['links'] <> 0)== $has_links)) )
-      {
-        continue ;
-      }
+		{
+			continue ;
+		}
  
   		// $id is a string, looks like this: page, namespace:page, or namespace:<subspaces>:page
   		$match_array = explode(":", $id);
@@ -351,27 +362,55 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
   		//add a trailing :
   		$page_namespace = $page_namespace . ':';
  
-  		//set it to show, unless blocked by exclusion list
-  		$show_it = true;
-  		foreach ($exclude_array as $exclude_item)
-      {
-  			//add a trailing : to each $item too
-  			$exclude_item = $exclude_item . ":";
-  			// need === to avoid boolean false
-  			// strpos(haystack, needle)
-  			// if exclusion is beginning of page's namespace , block it
-  			if (strpos($page_namespace, $exclude_item) === 0){
-  			   //there is a match, so block it
-  			   $show_it = false;
-  			}
-  		}
- 
+		if (empty($include_array)) 
+		{
+			// if inclusion list is empty then show all namespaces
+			$show_it = true;
+		} 
+		else 
+		{
+			// otherwise only show if in inclusion list
+			$show_it = false;
+			foreach ($include_array as $include_item)
+			{
+				//add a trailing : to each $item too
+				$include_item = $include_item . ":";
+				// need === to avoid boolean false
+				// strpos(haystack, needle)
+				// if exclusion is beginning of page's namespace , block it
+				if (strpos($page_namespace, $include_item) === 0)
+				{
+				   //there is a match, so show it and move on
+				   $show_it = true;
+				   break;
+				}
+			}
+		}
   		if( $show_it )
-      {
+		{
+			//check if blocked by exclusion list
+			foreach ($exclude_array as $exclude_item)
+			{
+				//add a trailing : to each $item too
+				$exclude_item = $exclude_item . ":";
+				// need === to avoid boolean false
+				// strpos(haystack, needle)
+				// if exclusion is beginning of page's namespace , block it
+				if (strpos($page_namespace, $exclude_item) === 0)
+				{
+				   //there is a match, so block it and move on
+				   $show_it = false;
+				   break;
+				}
+			}
+		}
+ 
+		if( $show_it )
+		{
         $output .=  "<tr><td>$count</td><td><a href=\"". wl($id)
         . "\" class=\"" . ($page_exists ? "wikilink1" : "wikilink2")
         . "\"  onclick=\"return svchk()\" onkeypress=\"return svchk()\">"
-        . $id .'</a></td>'
+        . end(explode(':',$id)) .'</a></td>'
   			. ($show_heading ? '<td>' . hsc(p_get_first_heading($id)) .'</td>' : '' )
         . '<td>' . $item['links']
         . ($has_links
