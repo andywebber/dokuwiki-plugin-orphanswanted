@@ -124,6 +124,9 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             and ! preg_match('<'.PREG_PATTERN_VALID_EMAIL.'>',$link) // E-Mail (pattern above is defined in inc/mail.php)
             and ! preg_match('!^#.+!',$link) // inside page link (html anchor)
             ) {
+                # remove parameters
+                $link = preg_replace('/\?.*/', '', $link) . "\n";
+
                 $pageExists = false;
                 resolve_pageid($currentNS, $link, $pageExists );
                 if ($conf['allowdebug']) echo sprintf("---- link='%s' %s ", $link, $pageExists?'EXISTS':'MISS');
