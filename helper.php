@@ -47,7 +47,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
         // try to avoid making duplicate entries for forms and pages
         $item = &$data["$id"];
-        
+
         if(isset($item)) {
             // This item already has a member in the array
             // Note that the file search found it
@@ -127,14 +127,14 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
                 $pageExists = false;
                 resolve_pageid($currentNS, $link, $pageExists );
                 if ($conf['allowdebug']) echo sprintf("---- link='%s' %s ", $link, $pageExists?'EXISTS':'MISS');
-                 
+
                 if(((strlen(ltrim($link)) > 0)           // there IS an id?
                 and !auth_quickaclcheck($link) < AUTH_READ)) {
                     // should be visible to user
                     //echo "      <!-- adding $link -->\n";
-                     
+
                     if($conf['allowdebug']) echo ' A_LINK' ;
-                     
+
                     $link= utf8_strtolower( $link );
                     $this->orph_handle_link($data, $link);
                 }
