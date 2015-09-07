@@ -158,40 +158,40 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
     //    valid  =  orph_report_table($data, true, true, $params_array);
 
     function orphan_pages($params_array) {
-        global $conf;
+        global $conf, $ID;
         $result = '';
         $data = array();
-        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => $ns));
+        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => getNS($ID)));
         $result .=  $this->orph_report_table($data, true, false, $params_array, 'orphan');
 
         return $result;
     }
 
     function wanted_pages($params_array) {
-        global $conf;
+        global $conf, $ID;
         $result = '';
         $data = array();
-        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => $ns));
+        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => getNS($ID)));
         $result .= $this->orph_report_table($data, false, true, $params_array, 'wanted');
 
         return $result;
     }
 
     function valid_pages($params_array) {
-        global $conf;
+        global $conf, $ID;
         $result = '';
         $data = array();
-        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => $ns));
+        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted'), array('ns' => getNS($ID)));
         $result .= $this->orph_report_table($data, true, true, $params_array, 'valid');
 
         return $result;
     }
 
     function all_pages($params_array) {
-        global $conf;
+        global $conf, $ID;
         $result = '';
         $data = array();
-        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted') , array('ns' => $ns));
+        search($data,$conf['datadir'], array($this, 'orph_callback_search_wanted') , array('ns' => getNS($ID)));
 
         $result .= "</p><p>Orphans</p><p>";
         $result .= $this->orph_report_table($data, true, false, $params_array, 'orphan');
