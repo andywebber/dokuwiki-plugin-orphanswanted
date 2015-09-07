@@ -85,7 +85,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
     function orph_Check_InternalLinks( &$data, $base, $file, $type, $lvl, $opts ) {
         global $conf;
 
-        define('LINK_PATTERN', '%\[\[([^\]|#]*)(#[^\]|]*)?\|?([^\]]*)]]%');
+        if (!defined('LINK_PATTERN')) define('LINK_PATTERN', '%\[\[([^\]|#]*)(#[^\]|]*)?\|?([^\]]*)]]%');
 
         if(!preg_match("/.*\.txt$/", $file)) {
             return;
