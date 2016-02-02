@@ -54,7 +54,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
     /**
      * Handle the match
      */
-    function handle($match, $state, $pos, &$handler){
+    function handle($match, $state, $pos, Doku_Handler $handler){
         $match_array = array();
         $match = substr($match,16,-2); //strip ~~ORPHANSWANTED: from start and ~~ from end
         
@@ -72,7 +72,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
     /**
      * Create output
      */
-    function render($format, &$renderer, $data) {
+    function render($format, Doku_Renderer $renderer, $data) {
         global $INFO, $conf;
         $helper = plugin_load('helper','orphanswanted');
         
