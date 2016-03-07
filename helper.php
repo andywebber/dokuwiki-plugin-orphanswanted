@@ -107,7 +107,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
                   '@<PHP>.*?</PHP>@su',
                   '@<html>.*?</html>@su',
                   '@<HTML>.*?</HTML>@su',
-                  '@\n( {2,}|\t)[^\*\- ].*?\n@su',
+                  '@^( {2,}|\t)[^\*\- ].*?$@mu',
                   '@<code[^>]*?>.*?<\/code>@su',
                   '@<file[^>]*?>.*?<\/file>@su'
         )
