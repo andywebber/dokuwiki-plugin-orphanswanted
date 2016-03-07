@@ -130,7 +130,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             and ! preg_match('!^#.+!',$link) // inside page link (html anchor)
             ) {
                 # remove parameters
-                $link = preg_replace('/\?.*/', '', $link) . "\n";
+                $link = preg_replace('/\?.*/', '', $link);
 
                 $pageExists = false;
                 resolve_pageid($currentNS, $link, $pageExists );
