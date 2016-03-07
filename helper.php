@@ -99,12 +99,17 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         // echo "  <!-- checking file: $file -->\n";
         $body = @file_get_contents($conf['datadir'] . $file);
 
-        // ignores entries in <nowiki>, %%, <code> and emails with @
+        // ignores entries in blocks that ignore links
         foreach( array(
-                  '/<nowiki>.*?<\/nowiki>/',
-                  '/%%.*?%%/',
-                  '@<code[^>]*?>.*?<\/code>@siu',
-                  '@<file[^>]*?>.*?<\/file>@siu'
+                  '@<nowiki>.*?<\/nowiki>@su',
+                  '@%%.*?%%@su',
+                  '@<php>.*?</php>@su',
+                  '@<PHP>.*?</PHP>@su',
+                  '@<html>.*?</html>@su',
+                  '@<HTML>.*?</HTML>@su',
+                  '@^( {2,}|\t)[^\*\- ].*?$@mu',
+                  '@<code[^>]*?>.*?<\/code>@su',
+                  '@<file[^>]*?>.*?<\/file>@su'
         )
         as $ignored )
         {
