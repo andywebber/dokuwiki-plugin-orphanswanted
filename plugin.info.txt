@@ -1,7 +1,7 @@
 base   orphanswanted
 author Doug Edmunds, Cyrille37, Federico Ariel Castagnini, Andy Webber, Matthias Schulte
 email  dokuwiki@lupo49.de
-date   2016-03-07
+date   2016-06-27
 name   orphanswanted plugin
 desc   Display Orphans, Wanteds and Valid link information
 url    http://dokuwiki.org/plugin:orphanswanted
