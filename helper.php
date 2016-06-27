@@ -253,8 +253,11 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             $show_it = true;
 
             if(!is_null($ignoredPages) && in_array($id, $ignoredPages)) {
-                    echo "Skipped page (global ignored): " . $id . "<br />";
-                    $show_it = false;
+                echo "Skipped page (global ignored): " . $id . "<br />";
+                $show_it = false;
+            } elseif(isHiddenPage($id)) {
+                echo "Skipped page (global hidden): " . $id . "<br />";
+                $show_it = false;
             } else {
                 foreach ($exclude_array as $exclude_item) {
                     //add a trailing : to each $item too
