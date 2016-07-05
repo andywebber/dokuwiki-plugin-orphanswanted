@@ -253,10 +253,10 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             $show_it = true;
 
             if(!is_null($ignoredPages) && in_array($id, $ignoredPages)) {
-                echo "Skipped page (global ignored): " . $id . "<br />";
+                if ($conf['allowdebug']) echo "Skipped page (global ignored): " . $id . "<br />";
                 $show_it = false;
             } elseif(isHiddenPage($id)) {
-                echo "Skipped page (global hidden): " . $id . "<br />";
+                if ($conf['allowdebug']) echo "Skipped page (global hidden): " . $id . "<br />";
                 $show_it = false;
             } else {
                 foreach ($exclude_array as $exclude_item) {
