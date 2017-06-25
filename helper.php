@@ -235,7 +235,14 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
                     . '</tr>'
                     . "\n" ;
 
-        arsort($data);
+        // Sort by namespace and name
+        ksort($data);
+
+        // Sort descending by existing links.
+        // This does not make sense for orphans since they don't have links.
+        if ($caller != "orphan") {
+            arsort($data);
+        }
 
         foreach($data as $id=>$item) {
             if( ! (($item['exists'] == $page_exists) and (($item['links'] <> 0)== $has_links)) ) continue ;
