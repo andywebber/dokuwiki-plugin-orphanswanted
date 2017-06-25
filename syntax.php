@@ -2,7 +2,8 @@
 /**
  * OrphansWanted Plugin: Display Orphans, Wanteds and Valid link information
  *
- * syntax ~~ORPHANSWANTED:<choice>[!<exclude list>]~~  <choice> :: orphans | wanted | valid | all
+ * syntax ~~ORPHANSWANTED:<choice>[@<include list>][!<exclude list>]~~  <choice> :: orphans | wanted | valid | all
+ * [@<include list>] :: optional.  prefix each with @ e.g., @wiki@comments:currentyear (defaults to all namespaces if not specified)
  * [!<exclude list>] :: optional.  prefix each with ! e.g., !wiki!comments:currentyear
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
@@ -10,6 +11,8 @@
  * @author     Andy Webber <dokuwiki at andywebber dot com>
  * @author     Federico Ariel Castagnini
  * @author     Cyrille37 <cyrille37@gmail.com>
+ * @author     Rik Blok <rik dot blok at ubc dot ca>
+ * @author     Christian Paul <christian at chrpaul dot de>
  */
 
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
@@ -48,7 +51,7 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
      * Connect pattern to lexer
      */
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[\w:!-]+~~', $mode, 'plugin_orphanswanted');
+        $this->Lexer->addSpecialPattern('~~ORPHANSWANTED:[\w:@!-]+~~', $mode, 'plugin_orphanswanted');
     }
 
     /**
@@ -61,7 +64,14 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
         // Wolfgang 2007-08-29 suggests commenting out the next line
         // $match = strtolower($match);
         //create array, using ! as separator
-        $match_array = explode("!", $match);
+        // eg: $match = 'all@includens!excludens'
+        $match_in = explode("@", $match);						// eg: $match_array = array();							$match_in = array('all', 'includens!excludens')
+        $match_ex = explode("!",array_pop($match_in));	// eg: $match_array = array();							$match_in = array('all');							$match_ex = array('includens', 'excludens')
+        array_push($match_in,array_shift($match_ex));		// eg: $match_array = array();							$match_in = array('all', 'includens');				$match_ex = array('excludens')
+        $match_array[0] = array_shift($match_in);			// eg: $match_array = array('all');					$match_in = array('includens');					$match_ex = array('excludens')
+        $match_array[1] = $match_in;								// eg: $match_array = array('all', array('includens'));														$match_ex = array('excludens')
+        $match_array[2] = $match_ex;								// eg: $match_array = array('all', array('includens'), array('excludens'))
+
         // $match_array[0] will be orphan, wanted, valid, all, or syntax error
         // if there are excluded namespaces, they will be in $match_array[1] .. [x]
         // this return value appears in render() as the $data param there
@@ -99,7 +109,6 @@ class syntax_plugin_orphanswanted extends DokuWiki_Syntax_Plugin {
                     break;
                 default:
                     $renderer->doc .= "ORPHANSWANTED syntax error";
-                   // $renderer->doc .= "syntax ~~ORPHANSWANTED:<choice>~~<optional_excluded>  <choice> :: orphans|wanted|valid|all  Ex: ~~ORPHANSWANTED:valid~~";
             }
             return true;
         }

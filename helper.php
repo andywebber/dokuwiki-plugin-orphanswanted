@@ -6,6 +6,8 @@
  * @author     Federico Ariel Castagnini
  * @author     Cyrille37 <cyrille37@gmail.com>
  * @author	   Matthias Schulte <dokuwiki@lupo49.de>
+ * @author     Rik Blok <rik dot blok at ubc dot ca>
+ * @author     Christian Paul <christian at chrpaul dot de>
  */
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
@@ -222,7 +224,8 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
         $show_heading = ($page_exists && $conf['useheading']) ? true : false ;
         //take off $params_array[0];
-        $exclude_array = array_slice($params_array,1);
+        $include_array = $params_array[1];
+        $exclude_array = $params_array[2];
 
         $count = 1;
         $output = '';
@@ -249,8 +252,25 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             //add a trailing :
             $page_namespace = $page_namespace . ':';
 
-            //set it to show, unless blocked by exclusion list
-            $show_it = true;
+            if (empty($include_array)) {
+                // if inclusion list is empty then show all namespaces
+                $show_it = true;
+            } else {
+                // otherwise only show if in inclusion list
+                $show_it = false;
+                foreach ($include_array as $include_item) {
+                    //add a trailing : to each $item too
+                    $include_item = $include_item . ":";
+                    // need === to avoid boolean false
+                    // strpos(haystack, needle)
+                    // if exclusion is beginning of page's namespace, block it
+                    if (strpos($page_namespace, $include_item) === 0) {
+                        //there is a match, so show it and move on
+                        $show_it = true;
+                        break;
+                    }
+                }
+            }
 
             if(!is_null($ignoredPages) && in_array($id, $ignoredPages)) {
                 if ($conf['allowdebug']) echo "Skipped page (global ignored): " . $id . "<br />";
@@ -258,7 +278,8 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
             } elseif(isHiddenPage($id)) {
                 if ($conf['allowdebug']) echo "Skipped page (global hidden): " . $id . "<br />";
                 $show_it = false;
-            } else {
+            } elseif ( $show_it )  {
+                //check if blocked by exclusion list
                 foreach ($exclude_array as $exclude_item) {
                     //add a trailing : to each $item too
                     $exclude_item = $exclude_item . ":";
@@ -266,8 +287,9 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
                     // strpos(haystack, needle)
                     // if exclusion is beginning of page's namespace , block it
                     if (strpos($page_namespace, $exclude_item) === 0) {
-                        //there is a match, so block it
+                        //there is a match, so block it and move on
                         $show_it = false;
+                        break;
                     }
                 }
             }
