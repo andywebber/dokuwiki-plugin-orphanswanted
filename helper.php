@@ -42,6 +42,9 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         // get id of this file
         $id = pathID($file);
 
+        // make sure ID is lowercase
+        $id = utf8_strtolower($id);
+
         //check ACL
         if(auth_quickaclcheck($id) < AUTH_READ) {
             return false;
