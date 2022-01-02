@@ -70,7 +70,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $data = $this->_get_page_data();
 
         $result = '';
-        $result .=  $this->orph_report_table($data, false, true, $params_array, 'valid');
+        $result .=  $this->orph_report_table($data, true, true, $params_array, 'valid');
 
         return $result;
     }
