@@ -31,10 +31,12 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $all_pages = idx_get_indexer()->getPages();
         $pages = array();
         foreach($all_pages as $pageid) {
-            $pages[$pageid] = array("exists"=>1, "links"=>0);
+            $pages[$pageid] = array("exists"=>page_exists($pageid), "links"=>0);
         }      
 
         foreach($all_pages as $pageid) {
+
+            if (!page_exists($pageid)) continue;
 
             $relation_data = p_get_metadata($pageid)['relation']['references'];
             if (!is_null($relation_data)) {
