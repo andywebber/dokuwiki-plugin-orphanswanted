@@ -14,7 +14,6 @@ if(!defined('DOKU_INC')) die();
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 require_once(DOKU_INC.'inc/search.php');
-require_once(DOKU_INC.'inc/search/Indexer.php');
 
 class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
