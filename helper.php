@@ -8,7 +8,7 @@
  * @author     Matthias Schulte <dokuwiki@lupo49.de>
  * @author     Rik Blok <rik dot blok at ubc dot ca>
  * @author     Christian Paul <christian at chrpaul dot de>
- * @author     alexdraconian <78018187+alexdraconian@users.noreply.github.com>
+ * @author     alexdraconian
  */
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
