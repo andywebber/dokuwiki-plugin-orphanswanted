@@ -5,9 +5,10 @@
  * @author     Andy Webber <dokuwiki at andywebber dot com>
  * @author     Federico Ariel Castagnini
  * @author     Cyrille37 <cyrille37@gmail.com>
- * @author	   Matthias Schulte <dokuwiki@lupo49.de>
+ * @author     Matthias Schulte <dokuwiki@lupo49.de>
  * @author     Rik Blok <rik dot blok at ubc dot ca>
  * @author     Christian Paul <christian at chrpaul dot de>
+ * @author     alexdraconian <78018187+alexdraconian@users.noreply.github.com>
  */
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
@@ -31,17 +32,17 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
         $pages = array();
         foreach($all_pages as $pageid) {
             $pages[$pageid] = array("exists"=>page_exists($pageid), "links"=>0);
-        }      
+        }
 
         foreach($all_pages as $pageid) {
 
             if (!page_exists($pageid)) continue;
 
-            $relation_data = p_get_metadata($pageid)['relation']['references'];
+            $relation_data = p_get_metadata($pageid, 'relation references', METADATA_DONT_RENDER);
             if (!is_null($relation_data)) {
-                foreach($relation_data as $name => $exist) {
-                    $pages[$name]['exist'] = $exist;
-                    $pages[$name]['links'] += 1;
+                foreach($relation_data as $name => $exists) {
+                    $pages[$name]['exists'] = $exists;
+                    $pages[$name]['links'] = isset($pages[$name]['links']) ? $pages[$name]['links'] + 1 : 1;
                 }
             }
         }
@@ -126,7 +127,7 @@ class helper_plugin_orphanswanted extends DokuWiki_Plugin {
 
         foreach($data as $id=>$item) {
 
-            if( ! (($item['exists'] == $page_exists) and (($item['links'] <> 0)== $has_links)) ) continue ;
+            if( ! ((array_key_exists('exists', $item)) and ($item['exists'] == $page_exists) and (array_key_exists('links', $item)) and (($item['links'] <> 0)== $has_links)) ) continue ;
 
             // $id is a string, looks like this: page, namespace:page, or namespace:<subspaces>:page
             $match_array = explode(":", $id);
