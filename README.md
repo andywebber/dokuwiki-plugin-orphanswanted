@@ -10,6 +10,6 @@ All documentation for the Orphanswanted Plugin is available online at:
 (c) 2010 Cyrille37 <cyrille37@gmail.com>  
 (c) 2011 Rik Blok <rik dot blok at ubc dot ca>  
 (c) 2016-2023 Christian Paul <christian at chrpaul dot de>  
-(c) 2022 alexdraconian <78018187+alexdraconian@users.noreply.github.com>
+(c) 2022 alexdraconian  
 
 See COPYING for license info.
